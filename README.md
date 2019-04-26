@@ -1,5 +1,8 @@
 # SPACE WAR 2000
 
+ ![](SpaceWar2000.png)
+
+
 Specification for the game and bots are in SPEC.md
 
 This part build with Visual Studio 2019 beta, C#. 
