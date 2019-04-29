@@ -40,7 +40,7 @@ Sending string across the command line seems to replace \n with nothing, so be s
 
 ### Bot response
 
-After receiving state data, the bot must return a single string with the list of fleets it wishes to launch. This has the format **`LAUNCH fleets E`** where fleets is a list of fleet launch commands, each of form **L src dst ship**
+After receiving state data, the bot must return a single string with the list of fleets it wishes to launch. This has the format **`MOVE fleets E`** where fleets is a list of fleet launch commands, each of form **L src dst ship**
 
 Each turn the player can send fleets from any planet the player owns to any other planet as long enough ships are on the source planet. Multiple fleets can be sent from the same planet, if the total does not exceed the number on the planet. Multiple fleets can be sent to a destination planet.
 
