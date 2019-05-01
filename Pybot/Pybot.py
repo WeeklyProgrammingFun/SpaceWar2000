@@ -59,6 +59,17 @@ class State:
             if planet.owner == str(2):
                 logger.debug("FIRST ENEMY IS PLANET {}".format(index))
                 return index
+                
+    def get_first_neutral_planet(self):
+        """ Returns first neutral planets index or False if no neutral planets found """
+        #TODO This could probably be merged with get_first_enemy_planet()
+        logger.debug("GETTING FIRST NEUTRAL PLANET")
+        for index, planet in enumerate(self.planets):
+            #TODO magic number
+            if planet.owner == str(0):
+                logger.debug("FIRST NEUTRAL IS PLANET {}".format(index))
+                return index
+        return False                
 
     def get_all_friendly_planets(self):
         logger.debug("GETTING FRIENDLY PLANETS")
@@ -74,7 +85,9 @@ class State:
 def make_moves(state):
     moves = "MOVE "
     friendly_planets = state.get_all_friendly_planets()
-    target = state.get_first_enemy_planet()
+    target = state.get_first_neutral_planet()
+    if target is False: #TODO have to use "is" because 0 == False.  Is there a better way to do this?
+        target = state.get_first_enemy_planet()
     for planet in friendly_planets:
         #TODO a planet should know its own index.  That would make this easier.
         moves = moves + "L {} {} {} ".format(str(planet[0]), str(target), str(planet[1]))
