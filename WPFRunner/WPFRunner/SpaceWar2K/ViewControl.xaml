@@ -90,6 +90,23 @@
 
     </UserControl.Resources>
     <DockPanel >
+        <GroupBox DockPanel.Dock="Bottom" Header="Messages" Height="250">
+            <ListBox ItemsSource="{Binding History}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Black" BorderThickness="1">
+                            <Border.ToolTip>
+                                <TextBlock Foreground="Red" Text="{Binding Error}"/>
+                            </Border.ToolTip>
+                            <StackPanel>
+                                <ListView ItemsSource="{Binding Messages}"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+
         <UniformGrid DockPanel.Dock="Right" Width="150" Columns="1">
             <GroupBox Header="Maps">
                 <ListBox ItemsSource="{Binding Maps}" SelectedItem="{Binding SelectedMap}">

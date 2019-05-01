@@ -91,6 +91,7 @@
     <Compile Include="Model\Result.cs" />
     <Compile Include="Model\Runner.cs" />
     <Compile Include="Model\Scorer.cs" />
+    <Compile Include="SpaceWar2K\FrameInfo.cs" />
     <Compile Include="SpaceWar2K\Fleet.cs" />
     <Compile Include="SpaceWar2K\Formatter.cs" />
     <Compile Include="SpaceWar2K\GameRunner.cs" />
