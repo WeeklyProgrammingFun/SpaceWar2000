@@ -46,7 +46,8 @@ namespace WPFRunner.Model
                             if (player1 != null && player2 != null)
                             {
                                 // check for bye
-                                var headTohead = SpaceWar2K.Interface.PlayMatch(rounds, player1, player2);
+                                // todo - max frame from?
+                                var headTohead = SpaceWar2K.Interface.PlayMatch(rounds, player1, player2,maxFrame:200);
                                 Interlocked.Increment(ref completedMatches);
                                 double completedRatio = completedMatches;
                                 completedRatio /= numGames;

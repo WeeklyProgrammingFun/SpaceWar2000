@@ -382,7 +382,7 @@ namespace WPFRunner.SpaceWar2K
 
             var res = await Task.Factory.StartNew(() =>
             {
-                return GameRunner.PlayOneGame(p1.player, p2.player, RandomSeed, queue.Enqueue);
+                return GameRunner.PlayOneGame(p1.player, p2.player, RandomSeed, queue.Enqueue, FrameMax);
             });
         }
 

@@ -45,6 +45,12 @@ namespace WPFRunner.Model
             proc.Write(text);
         }
 
+        public string GetDebugText()
+        {
+            return proc.GetErrorText();
+        }
+
+
         public List<string> Read(int msDelay)
         {
             var curMs = Environment.TickCount;

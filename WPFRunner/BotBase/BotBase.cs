@@ -84,9 +84,9 @@ namespace BotBase
                 EnemyName = tokens[1];
             else
                 EnemyName = "Bob";
-            if (!Int32.TryParse(tokens[1], out var seed))
+            if (!Int32.TryParse(tokens[2], out var seed))
                 seed = 1234;
-            if (tokens.Length > 2 || !Int32.TryParse(tokens[2],out MaxFrames))
+            if (tokens.Length > 2 || !Int32.TryParse(tokens[3],out MaxFrames))
             {
                 
             }

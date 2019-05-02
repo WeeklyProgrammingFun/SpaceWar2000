@@ -30,7 +30,7 @@ namespace WPFRunner.SpaceWar2K
             return move;
         }
 
-        public static Result PlayOneGame(Player p1, Player p2, int randomSeed, Action<FrameInfo> frameAction)
+        public static Result PlayOneGame(Player p1, Player p2, int randomSeed, Action<FrameInfo> frameAction, int maxFrame)
         {
             int maxMs = 5000;
             var gen = new MapGenerator();
@@ -38,8 +38,8 @@ namespace WPFRunner.SpaceWar2K
             var state = new State(1, 200, gen.Make(randomSeed), new List<Fleet>());
             var fInfo = new FrameInfo{State = state};
             
-            Write(p1,$"START {Path.GetFileNameWithoutExtension(p2.Filename)} {randomSeed} E");
-            Write(p2,$"START {Path.GetFileNameWithoutExtension(p1.Filename)} {randomSeed} E");
+            Write(p1,$"START {Path.GetFileNameWithoutExtension(p2.Filename)} {randomSeed} {maxFrame} E");
+            Write(p2,$"START {Path.GetFileNameWithoutExtension(p1.Filename)} {randomSeed} {maxFrame} E");
             frameAction?.Invoke(fInfo);
 
             var result = Result.Unfinished;
@@ -78,6 +78,15 @@ namespace WPFRunner.SpaceWar2K
                     result = result3;
                     state = nextState;
                 }
+                
+                // get debug text
+                var d1 = p1.GetDebugText();
+                var d2 = p2.GetDebugText();
+                if (!String.IsNullOrEmpty(d1))
+                    fInfo.Messages.Add($"DBG: {p1.Filename}: {d1}");
+                if (!String.IsNullOrEmpty(d2))
+                    fInfo.Messages.Add($"DBG: {p2.Filename}: {d2}");
+
                 frameAction?.Invoke(fInfo);
             }
 

@@ -3,6 +3,7 @@
  ![](SpaceWar2000.png)
 
 v0.2 4/25/2019
+v0.3 5/2/2019 - pass max frame to bots, can write to console error for debugging
 
 (Image: planets colored by owner, planet ids in yellow, population(growth rate) label, fleets colored by owner, population(turns left) label, cyan planet destination.)
 
@@ -14,7 +15,7 @@ A bot is a windows executable that reads standard input and writes to standard o
 
 | Command                | Meaning                                                         |
 |------------------------|-----------------------------------------------------------------|
-| START enemyName seed E | enemyName is a string, seed is an integer for seeding your rand |
+| START enemyName seed maxFrame E | enemyName is a string, seed is an integer for seeding your rand, maxFrame is game length |
 | STATE stateData      E | stateData  is the state of the world, detailed below            |
 | RESULT result        E | result is Win,Loss,Tie at the end of a game                     |
 | QUIT                 E | Bot program should exit                                         |
