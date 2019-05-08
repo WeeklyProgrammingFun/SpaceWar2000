@@ -344,3 +344,14 @@ healthchecksdb
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
+*.toc
+*.pkg
+*.manifest
+*.pyz
+Pybot/build/Pybot/warn-Pybot.txt
+Pybot/build/Pybot/xref-Pybot.html
+Pybot/Pybot.spec
+Staging/Pybot.exe
+Pybot/build/mybot/warn-mybot.txt
+Pybot/build/mybot/xref-mybot.html
+Pybot/mybot.spec
