@@ -84,7 +84,9 @@ namespace BotBase
                 EnemyName = tokens[1];
             else
                 EnemyName = "Bob";
-            if (tokens.Length > 2 || !Int32.TryParse(tokens[2],out MaxFrames))
+            if (!Int32.TryParse(tokens[2], out var seed))
+                seed = 1234;
+            if (tokens.Length > 2 || !Int32.TryParse(tokens[3],out MaxFrames))
             {
                 
             }
@@ -92,7 +94,7 @@ namespace BotBase
             {
                 MaxFrames = 200;
             }
-            Rand = new Random(1234); // todo - seed from input
+            Rand = new Random(seed);
         }
 
         void Error(string error)

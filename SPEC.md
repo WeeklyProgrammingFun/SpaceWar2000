@@ -3,6 +3,7 @@
  ![](SpaceWar2000.png)
 
 v0.2 4/25/2019
+v0.3 5/2/2019 - pass max frame to bots, can write to console error for debugging
 
 (Image: planets colored by owner, planet ids in yellow, population(growth rate) label, fleets colored by owner, population(turns left) label, cyan planet destination.)
 
@@ -14,7 +15,7 @@ A bot is a windows executable that reads standard input and writes to standard o
 
 | Command                | Meaning                                                         |
 |------------------------|-----------------------------------------------------------------|
-| START enemyName seed E | enemyName is a string, seed is an integer for seeding your rand |
+| START enemyName seed maxFrame E | enemyName is a string, seed is an integer for seeding your rand, maxFrame is game length |
 | STATE stateData      E | stateData  is the state of the world, detailed below            |
 | RESULT result        E | result is Win,Loss,Tie at the end of a game                     |
 | QUIT                 E | Bot program should exit                                         |
@@ -40,7 +41,7 @@ Sending string across the command line seems to replace \n with nothing, so be s
 
 ### Bot response
 
-After receiving state data, the bot must return a single string with the list of fleets it wishes to launch. This has the format **`LAUNCH fleets E`** where fleets is a list of fleet launch commands, each of form **L src dst ship**
+After receiving state data, the bot must return a single string with the list of fleets it wishes to launch. This has the format **`MOVE fleets E`** where fleets is a list of fleet launch commands, each of form **L src dst ship**
 
 Each turn the player can send fleets from any planet the player owns to any other planet as long enough ships are on the source planet. Multiple fleets can be sent from the same planet, if the total does not exceed the number on the planet. Multiple fleets can be sent to a destination planet.
 

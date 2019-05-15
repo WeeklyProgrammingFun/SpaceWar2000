@@ -50,15 +50,26 @@ namespace WPFRunner.SpaceWar2K
 
         void TimerTick()
         {
+            bool redrawSpecial = false; // special need to redraw
+            while (frameQueue.TryDequeue(out var frame))
+            {
+                History.Add(frame);
+                redrawSpecial = true;
+            }
+
+            if (planetDiameters == null && History.Any())
+            {
+                planetDiameters = CreatePlanetRadii(History[0].State);
+                redrawSpecial = true;
+            }
+
             if (Playback)
             {
-                while (stateQueue.TryDequeue(out var state))
-                    history.Add(state);
-                if (planetDiameters == null && history.Any())
-                    planetDiameters = CreatePlanetRadii(history[0]);
-                if (Frame < history.Count)
+                if (Frame < History.Count)
                     Frame++;
             }
+            else if (redrawSpecial)
+                DrawFrame();
         }
 
         DispatcherTimer timer = new DispatcherTimer();
@@ -217,11 +228,11 @@ namespace WPFRunner.SpaceWar2K
         State CurFrame()
         {
             int frame = Frame;
-            if (frame >= history.Count)
-                frame = history.Count - 1;
+            if (frame >= History.Count)
+                frame = History.Count - 1;
             if (frame < 0)
                 return new State(1,1,new List<Planet>(), new List<Fleet>());
-            var state = history[frame];
+            var state = History[frame].State;
             return state;
         }
 
@@ -340,7 +351,7 @@ namespace WPFRunner.SpaceWar2K
             set { Set(ref backgroundImage, value); }
         }
 
-        ConcurrentQueue<State> stateQueue = new ConcurrentQueue<State>();
+        ConcurrentQueue<FrameInfo> frameQueue = new ConcurrentQueue<FrameInfo>();
 
         // fire off a game with selected parameters
         async void StartGame()
@@ -357,23 +368,25 @@ namespace WPFRunner.SpaceWar2K
             }
 
             LoadBackground();
+            frameQueue = new ConcurrentQueue<FrameInfo>(); // erase old one
+            var queue = frameQueue; // use local to avoid some background thread problems - todo - better to cancel and check cancel took, but more complicated
 
             Frame = 0;
             planetDiameters = null;
-            while (stateQueue.TryDequeue(out var s))
+            while (queue.TryDequeue(out var s))
             { // nothing
             }
-            history.Clear();
+            History.Clear();
 
             var dispatcher = Dispatcher.CurrentDispatcher;
 
             var res = await Task.Factory.StartNew(() =>
             {
-                return GameRunner.PlayOneGame(p1.player, p2.player, RandomSeed, stateQueue.Enqueue);
+                return GameRunner.PlayOneGame(p1.player, p2.player, RandomSeed, queue.Enqueue, FrameMax);
             });
         }
 
-        List<State> history = new List<State>();
+        public ObservableCollection<FrameInfo> History { get; } = new ObservableCollection<FrameInfo>();
 
         #region History
         // HistoryLines to render on history canvas
@@ -382,7 +395,7 @@ namespace WPFRunner.SpaceWar2K
         void DrawHistory()
         {
             var border = 10.0;
-            var states = history;
+            var states = History.Select(f=>f.State).ToList();
             if (states.Count < 2)
                 return;
             var pop1 = states.Select(s => s.Population(1)).ToList();
@@ -408,7 +421,7 @@ namespace WPFRunner.SpaceWar2K
             DrawLines(pop1, maxPop, Brushes.Green, pop2.Last() == 0);
 
             // add cursor
-            var alpha = (double) Math.Min(Frame,history.Count) / history.Count;
+            var alpha = (double) Math.Min(Frame,History.Count) / History.Count;
             var cy = (historySize.Height - 2 * border) * alpha + border;
             line1 = new Line
             {

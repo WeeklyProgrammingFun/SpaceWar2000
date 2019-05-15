@@ -26,6 +26,10 @@ namespace WPFRunner.SpaceWar2K
         public static List<Launch> MoveToLaunches(string move, Owner owner)
         {   // MOVE [L src dst pop]* E
             // L src dst number ... E
+
+            if (!move.EndsWith(" E"))
+                return null;
+
             var clean = move.Replace("\r", " ").Replace("\n", " ");
             var tokens = clean.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
             if (((tokens.Length - 2) % 4) != 0 || tokens.Last().ToUpper() != "E" || tokens.First().ToUpper() != "MOVE")

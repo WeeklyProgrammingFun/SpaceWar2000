@@ -30,64 +30,105 @@ namespace WPFRunner.SpaceWar2K
             return move;
         }
 
-        public static Result PlayOneGame(Player p1, Player p2, int randomSeed, Action<State> stateAction)
+        public static Result PlayOneGame(Player p1, Player p2, int randomSeed, Action<FrameInfo> frameAction, int maxFrame)
         {
             int maxMs = 5000;
             var gen = new MapGenerator();
 
             var state = new State(1, 200, gen.Make(randomSeed), new List<Fleet>());
-            stateAction?.Invoke(state);
+            var fInfo = new FrameInfo{State = state};
+            
+            Write(p1,$"START {Path.GetFileNameWithoutExtension(p2.Filename)} {randomSeed} {maxFrame} E");
+            Write(p2,$"START {Path.GetFileNameWithoutExtension(p1.Filename)} {randomSeed} {maxFrame} E");
+            frameAction?.Invoke(fInfo);
 
-            p1.Write($"START {Path.GetFileNameWithoutExtension(p2.Filename)} {randomSeed} E");
-            p2.Write($"START {Path.GetFileNameWithoutExtension(p1.Filename)} {randomSeed} E");
-
-            while (true)
+            var result = Result.Unfinished;
+            while (result == Result.Unfinished)
             {
-                p1.Write("STATE " + Formatter.StateToText(state,false) +" E");
-                p2.Write("STATE " + Formatter.StateToText(state, true) + " E");
+                fInfo = new FrameInfo{State = state};
 
-                var move1 = ReadMove(p1,maxMs);
-                var move2 = ReadMove(p2, maxMs);
+                Write(p1,"STATE " + Formatter.StateToText(state,false) + " E");
+                Write(p2,"STATE " + Formatter.StateToText(state, true) + " E");
 
-                if (!move1.EndsWith(" E"))
-                    return (Result.Player2Win);
-                if (!move2.EndsWith(" E"))
-                    return (Result.Player1Win);
+                var move1 = Read(p1);
+                var move2 = Read(p2);
 
                 var l1 = Formatter.MoveToLaunches(move1, Owner.Player1);
                 var l2 = Formatter.MoveToLaunches(move2, Owner.Player2);
 
-                if (l1 == null)
-                    return (Result.Player2Win); // illegal move
-                if (l2 == null)
-                    return (Result.Player1Win); // illegal move
-
-                var launches = l1.Concat(l2).ToList();
-                var (result, nextState) = StateUpdater.Update(launches, state);
-
-                state = nextState;
-                stateAction?.Invoke(state);
-
-                if (result != Result.Unfinished)
+                if (l1 == null && l2 != null)
                 {
-                    if (result == Result.Player1Win)
-                    {
-                        p1.Write("RESULT Win E");
-                        p2.Write("RESULT Lose E");
-                    }
-                    else if (result == Result.Player2Win)
-                    {
-                        p1.Write("RESULT Lose E");
-                        p2.Write("RESULT Win E");
-                    }
-                    else if (result == Result.Tie)
-                    {
-                        p1.Write("RESULT Tie E");
-                        p2.Write("RESULT Tie E");
-                    }
-                    return (result);
+                    fInfo.Error = "Player 1 invalid move";
+                    result = Result.Player2Win;
+                }
+                else if (l2 == null && l1 != null)
+                {
+                    fInfo.Error = "Player 2 invalid move";
+                    result = Result.Player1Win;
+                }
+                else if (l1 == null && l2 == null)
+                {
+                    fInfo.Error = "Both players invalid move";
+                    result = Result.Tie;
+                }
+                else
+                {
+                    var launches = l1.Concat(l2).ToList();
+                    var (result3, nextState) = StateUpdater.Update(launches, state);
+                    result = result3;
+                    state = nextState;
+                }
+                
+                // get debug text
+                var d1 = p1.GetDebugText();
+                var d2 = p2.GetDebugText();
+                if (!String.IsNullOrEmpty(d1))
+                    fInfo.Messages.Add($"DBG: {p1.Filename}: {d1}");
+                if (!String.IsNullOrEmpty(d2))
+                    fInfo.Messages.Add($"DBG: {p2.Filename}: {d2}");
+
+                frameAction?.Invoke(fInfo);
+            }
+
+            fInfo = new FrameInfo {State = state};
+            if (result != Result.Unfinished)
+            {
+                if (result == Result.Player1Win)
+                {
+                    Write(p1,"RESULT Win E");
+                    Write(p2,"RESULT Lose E");
+                }
+                else if (result == Result.Player2Win)
+                {
+                    Write(p1,"RESULT Lose E");
+                    Write(p2,"RESULT Win E");
+                }
+                else if (result == Result.Tie)
+                {
+                    Write(p1,"RESULT Tie E");
+                    Write(p2,"RESULT Tie E");
                 }
             }
+
+            frameAction?.Invoke(fInfo);
+
+            return result;
+
+            // write and log to frame
+            void Write(Player p, string msg)
+            {
+                p.Write(msg);
+                fInfo.Write(p.Filename, msg);
+            }
+
+            // read from player, log to frame
+            string Read(Player p)
+            {
+                var move = ReadMove(p, maxMs);
+                fInfo.Read(p.Filename, move);
+                return move;
+            }
+
         }
     }
 }

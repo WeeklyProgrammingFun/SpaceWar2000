@@ -41,6 +41,14 @@ namespace WPFRunner.Model
             //process.WaitForExit();
         }
 
+        ~ProcessCapture()
+        {
+            // brutal kill if not earlier
+            // todo - does not always work. Try https://gist.github.com/jvshahid/6fb2f91fa7fb1db23599
+            if (!process.HasExited)
+                process.Kill();
+        }
+
         /// <summary>
         /// Write a message to the item
         /// </summary>
@@ -100,8 +108,18 @@ namespace WPFRunner.Model
             //Console.WriteLine(string.Format("process exited with code {0}\n", process.ExitCode.ToString()));
         }
 
+        ConcurrentQueue<string> errorText = new ConcurrentQueue<string>();
+
+        public string GetErrorText()
+        {
+            var sb = new StringBuilder();
+            while (errorText.TryDequeue(out string msg))
+                sb.Append(msg);
+            return sb.ToString();
+        }
         void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
+            errorText.Enqueue(e.Data);
             // Console.WriteLine("ERROR: " + e.Data + "\n");
         }
 
