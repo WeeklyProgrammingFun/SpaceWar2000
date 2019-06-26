@@ -63,17 +63,17 @@ class State:
         logger.debug("DISTANCE IS {}".format(distance))
         return distance
 
-    def get_closest_target(self, pair):
+    def get_closest_target(self, pair, old_targets=[]):
         logger.debug("GETTING CLOSEST TARGET")
         target = None
         distance = None
         for index, planet in enumerate(self.planets):
             #TODO magic number
-            logger.debug("PLANET OWNDER: {}".format(planet.owner))
+            logger.debug("PLANET OWNER: {}".format(planet.owner))
             if planet.owner != str(1):
                 new_distance = self.get_distance(pair, [planet.x, planet.y])
                 logger.debug("FOUND A HOSTILE PLANET, DISTANCE: {}".format(new_distance))
-                if target == None or new_distance < distance:
+                if (target == None or new_distance < distance) and str(index) not in old_targets:
                     logger.debug("AND IT'S CLOSER")
                     target = index
                     distance = self.get_distance(pair, [planet.x, planet.y])
@@ -109,6 +109,70 @@ class State:
                 logger.debug("PLANET IS FRIENDLY")
                 planets.append([index, planet.ships])
         return planets
+
+    def who_owns(self, index, moves, turns):
+        logger.debug("Who will own planet {}".format(str(index)))
+        if self.planets[index].owner == str(1):
+            # I already own the planet, return
+            return str(1)
+        #Get fleets from new moves
+        engaged_fleets = self.get_newly_engaged_fleets(moves, index)            
+        pop = self.planets[index].ships
+        owner = self.planets[index].owner
+        for fleet in self.fleets:
+            if fleet.dest == index:
+                engaged_fleets.append(fleet)
+        logger.debug("{} fleets engaged".format(len(engaged_fleets)))
+        for turn in range(turns):
+            for fleet in engaged_fleets:
+                #TODO remove fleets that land
+                if fleet.turnsRemaining == turn:
+                    # This fleet landed, do its action
+                    if fleet.owner == owner:
+                        pop = pop + fleet.ships
+                    else:
+                        pop = pop - fleet.ships
+                if pop < 0:
+                    logger.debug("{} now owns the planet".format(fleet.owner))
+                    #TODO abs value?  OR is this good enough?
+                    pop = pop * (-1)
+                    owner = fleet.owner
+        logger.debug("{} will own the planet".format(owner))
+        return owner
+
+    def get_newly_engaged_fleets(self, state, index):
+        logger.debug("Getting newly engaged fleets...")
+        planet_length = 6
+        fleet_length = 6
+
+        engaged_fleets = []
+        spaceState = State()
+        state_i = 0
+        planet_length = 6
+        fleet_length = 6
+        while state_i < len(state):
+            #TODO use and instead of nested if?
+            if state[state_i] == "P":
+                if (state_i + planet_length) <= len(state):
+                    spaceState.create_planet(*state[state_i+1:state_i + planet_length])
+                    state_i = state_i + planet_length
+            #TODO use and instead of nested if?
+            elif state[state_i] == "F" and (state_i + fleet_length) <= len(state):
+                if (state_i + fleet_length) <= len(state):
+                    spaceState.create_fleet(*state[state_i+1:state_i + fleet_length])                    
+                    state_i = state_i + fleet_length
+            else:
+                logger.debug("Done getting fleets!")
+                break
+        
+        for fleet in spaceState.fleets:
+            if fleet.dest == index:
+                engaged_fleets.append(fleet)
+        logger.debug("Returning Newly Engaged Fleets!")
+        return(engaged_fleets)
+
+
+
 
 class Pybot:
     #TODO can this be taken out???
