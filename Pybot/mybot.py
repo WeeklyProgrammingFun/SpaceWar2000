@@ -15,7 +15,7 @@ def make_moves(self, state):
     moves = "MOVE "
     friendly_planets = state.get_all_friendly_planets()
     #TODO get geometrical mean
-    target = state.get_closest_target()
+    target = state.get_closest_target([0, 0])
     for planet in friendly_planets:
         #TODO a planet should know its own index.  That would make this easier.
         moves = moves + "L {} {} {} ".format(str(planet[0]), str(target), str(planet[1]))

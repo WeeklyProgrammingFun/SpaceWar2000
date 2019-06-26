@@ -2,8 +2,8 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-#handler = logging.FileHandler("Pybot.log", mode='w', encoding=None, delay=False)
+#handler = logging.StreamHandler()
+handler = logging.FileHandler("Pybot.log", mode='w', encoding=None, delay=False)
 formatter = logging.Formatter('[%(asctime)s] %(name)-12s %(levelname)-8s --> %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
@@ -55,9 +55,13 @@ class State:
         """
         Get the distance between two points
         """
-        x = pair1[0] - pair2[0]
-        y = pair1[1] - pair2[1]
-        return(math.sqrt((x * x) + (y * y)))
+        logger.debug("GET DISTANCE BETWEEN {} and {}".format(pair1, pair2))
+        x = float(pair1[0]) - float(pair2[0])
+        y = float(pair1[1]) - float(pair2[1])
+        logger.debug("COMPUTING DISTANCE... with {} and {}".format(x, y))
+        distance = ((x * x) + (y * y))
+        logger.debug("DISTANCE IS {}".format(distance))
+        return distance
 
     def get_closest_target(self, pair):
         logger.debug("GETTING CLOSEST TARGET")
@@ -65,11 +69,15 @@ class State:
         distance = None
         for index, planet in enumerate(self.planets):
             #TODO magic number
+            logger.debug("PLANET OWNDER: {}".format(planet.owner))
             if planet.owner != str(1):
-                if target == None or self.get_distance(pair, [planet.x, planet.y]) > distance:
+                new_distance = self.get_distance(pair, [planet.x, planet.y])
+                logger.debug("FOUND A HOSTILE PLANET, DISTANCE: {}".format(new_distance))
+                if target == None or new_distance < distance:
+                    logger.debug("AND IT'S CLOSER")
                     target = index
                     distance = self.get_distance(pair, [planet.x, planet.y])
-        return index
+        return target
 
     def get_first_enemy_planet(self):
         #TODO fix logger format to put function in log
